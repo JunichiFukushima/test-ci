@@ -1,0 +1,48 @@
+# 設定するlintersを指定
+linters:
+  # ホワイトリストで指定する
+  disable-all: true
+  enable:
+    - govet
+    - staticcheck
+    - gofmt
+    - errcheck
+    - gosec
+
+# 各lintersの設定をする
+linters-settings:
+  errcheck:
+    # Report about not checking of errors in type assertions: `a := b.(MyStruct)`.
+    # Such cases aren't reported by default.
+    # Default: false
+    check-type-assertions: true
+    # report about assignment of errors to blank identifier: `num, _ := strconv.Atoi(numStr)`.
+    # Such cases aren't reported by default.
+    # Default: false
+    check-blank: true
+    # To disable the errcheck built-in exclude list.
+    # See `-excludeonly` option in https://github.com/kisielk/errcheck#excluding-functions for details.
+    # Default: false
+    disable-default-exclusions: true
+    # List of functions to exclude from checking, where each entry is a single function to exclude.
+    # See https://github.com/kisielk/errcheck#excluding-functions for details.
+    exclude-functions:
+      - io/ioutil.ReadFile
+      - io.Copy(*bytes.Buffer)
+      - io.Copy(os.Stdout)
+  gofmt:
+    simplify: true
+  gosec:
+    severity: medium
+    confidence: high
+
+# run:
+#   timeout: 2m
+#   tests: true
+
+# issues:
+#   exclude-use-default: false
+#   max-issues-per-linter: 0
+#   max-same-issues: 0
+#   exclude:
+#     - "SA1019" # 非推奨APIの警告を一時的に無効化
