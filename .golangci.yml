@@ -6,35 +6,343 @@ linters:
     - govet
     - staticcheck
     - gofmt
-    - errcheck
+    - errcheck 
+    - gosec
+    - asasalint
+    - bodyclose
+    - canonicalheader
+    - contextcheck
+    - misspell
+    - cyclop
+    - gosimple
     - gosec
 
 # 各lintersの設定をする
 linters-settings:
+  # エラーハンドリングしてるか
   errcheck:
-    # Report about not checking of errors in type assertions: `a := b.(MyStruct)`.
-    # Such cases aren't reported by default.
-    # Default: false
+    # 型アサーションでエラーチェックを省略するケースをチェック
+    # (例) `a := b.(MyStruct)`.
     check-type-assertions: true
-    # report about assignment of errors to blank identifier: `num, _ := strconv.Atoi(numStr)`.
-    # Such cases aren't reported by default.
-    # Default: false
+    # 空白識別子にエラーを割り当てて無視するケースをチェック
+    # エラーチェックしていない場合: 
+    # (例) `num, _ := strconv.Atoi(numStr)`.
     check-blank: true
-    # To disable the errcheck built-in exclude list.
-    # See `-excludeonly` option in https://github.com/kisielk/errcheck#excluding-functions for details.
-    # Default: false
-    disable-default-exclusions: true
-    # List of functions to exclude from checking, where each entry is a single function to exclude.
-    # See https://github.com/kisielk/errcheck#excluding-functions for details.
-    exclude-functions:
-      - io/ioutil.ReadFile
-      - io.Copy(*bytes.Buffer)
-      - io.Copy(os.Stdout)
+    # 以下の例にあるようなデフォルトの除外リストをチェック対象にするか
+    # (例) fmt.Printf, fmt.Println などの フォーマット関数 / io.Write, io.WriteString などの I/O 関連の関数
+    disable-default-exclusions: false # ノイズなのでセットしない
   gofmt:
     simplify: true
   gosec:
     severity: medium
     confidence: high
+  # 可変長引数を受け取る関数へスライスを渡せないようにする
+  # NOTE: いらんかも
+  asasalint:
+  # HTTPヘッダーにおいてCanonical形式の書き方をしているか
+  canonicalheader:
+  # bodyがちゃんと閉じられているか
+  bodyclose:
+  # 関数が親のcontext（コンテキスト）を適切に受け継いでいるかを確認
+  contextcheck:
+  # ミススペル検出
+  # misspell: # NOTE: 検出されない
+  # 循環複雑度計測
+  cyclop:
+    max-complexity: 10 # 30以上でバグ混入率が40%以上にんる￥
+    package-average: 0.5
+    skip-tests: true
+  # シンプルな書き方を強要する
+  gosimple:
+    # Sxxxx checks in https://staticcheck.dev/docs/configuration/options/#checks
+    # Default: ["*"]
+    checks:
+      # Use plain channel send or receive instead of single-case select.
+      # https://staticcheck.dev/docs/checks/#S1000
+      - S1000
+      # Replace for loop with call to copy.
+      # https://staticcheck.dev/docs/checks/#S1001
+      - S1001
+      # Omit comparison with boolean constant.
+      # https://staticcheck.dev/docs/checks/#S1002
+      - S1002
+      # Replace call to 'strings.Index' with 'strings.Contains'.
+      # https://staticcheck.dev/docs/checks/#S1003
+      - S1003
+      # Replace call to 'bytes.Compare' with 'bytes.Equal'.
+      # https://staticcheck.dev/docs/checks/#S1004
+      - S1004
+      # Drop unnecessary use of the blank identifier.
+      # https://staticcheck.dev/docs/checks/#S1005
+      - S1005
+      # Use "for { ... }" for infinite loops.
+      # https://staticcheck.dev/docs/checks/#S1006
+      - S1006
+      # Simplify regular expression by using raw string literal.
+      # https://staticcheck.dev/docs/checks/#S1007
+      - S1007
+      # Simplify returning boolean expression.
+      # https://staticcheck.dev/docs/checks/#S1008
+      - S1008
+      # Omit redundant nil check on slices, maps, and channels.
+      # https://staticcheck.dev/docs/checks/#S1009
+      - S1009
+      # Omit default slice index.
+      # https://staticcheck.dev/docs/checks/#S1010
+      - S1010
+      # Use a single 'append' to concatenate two slices.
+      # https://staticcheck.dev/docs/checks/#S1011
+      - S1011
+      # Replace 'time.Now().Sub(x)' with 'time.Since(x)'.
+      # https://staticcheck.dev/docs/checks/#S1012
+      - S1012
+      # Use a type conversion instead of manually copying struct fields.
+      # https://staticcheck.dev/docs/checks/#S1016
+      - S1016
+      # Replace manual trimming with 'strings.TrimPrefix'.
+      # https://staticcheck.dev/docs/checks/#S1017
+      - S1017
+      # Use "copy" for sliding elements.
+      # https://staticcheck.dev/docs/checks/#S1018
+      - S1018
+      # Simplify "make" call by omitting redundant arguments.
+      # https://staticcheck.dev/docs/checks/#S1019
+      - S1019
+      # Omit redundant nil check in type assertion.
+      # https://staticcheck.dev/docs/checks/#S1020
+      - S1020
+      # Merge variable declaration and assignment.
+      # https://staticcheck.dev/docs/checks/#S1021
+      - S1021
+      # Omit redundant control flow.
+      # https://staticcheck.dev/docs/checks/#S1023
+      - S1023
+      # Replace 'x.Sub(time.Now())' with 'time.Until(x)'.
+      # https://staticcheck.dev/docs/checks/#S1024
+      - S1024
+      # Don't use 'fmt.Sprintf("%s", x)' unnecessarily.
+      # https://staticcheck.dev/docs/checks/#S1025
+      - S1025
+      # Simplify error construction with 'fmt.Errorf'.
+      # https://staticcheck.dev/docs/checks/#S1028
+      - S1028
+      # Range over the string directly.
+      # https://staticcheck.dev/docs/checks/#S1029
+      - S1029
+      # Use 'bytes.Buffer.String' or 'bytes.Buffer.Bytes'.
+      # https://staticcheck.dev/docs/checks/#S1030
+      - S1030
+      # Omit redundant nil check around loop.
+      # https://staticcheck.dev/docs/checks/#S1031
+      - S1031
+      # Use 'sort.Ints(x)', 'sort.Float64s(x)', and 'sort.Strings(x)'.
+      # https://staticcheck.dev/docs/checks/#S1032
+      - S1032
+      # Unnecessary guard around call to "delete".
+      # https://staticcheck.dev/docs/checks/#S1033
+      - S1033
+      # Use result of type assertion to simplify cases.
+      # https://staticcheck.dev/docs/checks/#S1034
+      - S1034
+      # Redundant call to 'net/http.CanonicalHeaderKey' in method call on 'net/http.Header'.
+      # https://staticcheck.dev/docs/checks/#S1035
+      - S1035
+      # Unnecessary guard around map access.
+      # https://staticcheck.dev/docs/checks/#S1036
+      - S1036
+      # Elaborate way of sleeping.
+      # https://staticcheck.dev/docs/checks/#S1037
+      - S1037
+      # Unnecessarily complex way of printing formatted string.
+      # https://staticcheck.dev/docs/checks/#S1038
+      - S1038
+      # Unnecessary use of 'fmt.Sprint'.
+      # https://staticcheck.dev/docs/checks/#S1039
+      - S1039
+      # Type assertion to current type.
+      # https://staticcheck.dev/docs/checks/#S1040
+      - S1040
+  # セキュリティ周り
+  gosec:
+    # To select a subset of rules to run.
+    # Available rules: https://github.com/securego/gosec#available-rules
+    # Default: [] - means include all rules
+    includes:
+      - G101 # Look for hard coded credentials
+      - G102 # Bind to all interfaces
+      - G103 # Audit the use of unsafe block
+      - G104 # Audit errors not checked
+      - G106 # Audit the use of ssh.InsecureIgnoreHostKey
+      - G107 # Url provided to HTTP request as taint input
+      - G108 # Profiling endpoint automatically exposed on /debug/pprof
+      - G109 # Potential Integer overflow made by strconv.Atoi result conversion to int16/32
+      - G110 # Potential DoS vulnerability via decompression bomb
+      - G111 # Potential directory traversal
+      - G112 # Potential slowloris attack
+      - G113 # Usage of Rat.SetString in math/big with an overflow (CVE-2022-23772)
+      - G114 # Use of net/http serve function that has no support for setting timeouts
+      - G115 # Potential integer overflow when converting between integer types
+      - G201 # SQL query construction using format string
+      - G202 # SQL query construction using string concatenation
+      - G203 # Use of unescaped data in HTML templates
+      - G204 # Audit use of command execution
+      - G301 # Poor file permissions used when creating a directory
+      - G302 # Poor file permissions used with chmod
+      - G303 # Creating tempfile using a predictable path
+      - G304 # File path provided as taint input
+      - G305 # File traversal when extracting zip/tar archive
+      - G306 # Poor file permissions used when writing to a new file
+      - G307 # Poor file permissions used when creating a file with os.Create
+      - G401 # Detect the usage of MD5 or SHA1
+      - G402 # Look for bad TLS connection settings
+      - G403 # Ensure minimum RSA key length of 2048 bits
+      - G404 # Insecure random number source (rand)
+      - G405 # Detect the usage of DES or RC4
+      - G406 # Detect the usage of MD4 or RIPEMD160
+      - G501 # Import blocklist: crypto/md5
+      - G502 # Import blocklist: crypto/des
+      - G503 # Import blocklist: crypto/rc4
+      - G504 # Import blocklist: net/http/cgi
+      - G505 # Import blocklist: crypto/sha1
+      - G506 # Import blocklist: golang.org/x/crypto/md4
+      - G507 #Import blocklist: golang.org/x/crypto/ripemd160
+      - G601 # Implicit memory aliasing of items from a range statement
+      - G602 # Slice access out of bounds
+    # To specify a set of rules to explicitly exclude.
+    # Available rules: https://github.com/securego/gosec#available-rules
+    # Default: []
+    excludes:
+      - G101 # Look for hard coded credentials
+      - G102 # Bind to all interfaces
+      - G103 # Audit the use of unsafe block
+      - G104 # Audit errors not checked
+      - G106 # Audit the use of ssh.InsecureIgnoreHostKey
+      - G107 # Url provided to HTTP request as taint input
+      - G108 # Profiling endpoint automatically exposed on /debug/pprof
+      - G109 # Potential Integer overflow made by strconv.Atoi result conversion to int16/32
+      - G110 # Potential DoS vulnerability via decompression bomb
+      - G111 # Potential directory traversal
+      - G112 # Potential slowloris attack
+      - G113 # Usage of Rat.SetString in math/big with an overflow (CVE-2022-23772)
+      - G114 # Use of net/http serve function that has no support for setting timeouts
+      - G115 # Potential integer overflow when converting between integer types
+      - G201 # SQL query construction using format string
+      - G202 # SQL query construction using string concatenation
+      - G203 # Use of unescaped data in HTML templates
+      - G204 # Audit use of command execution
+      - G301 # Poor file permissions used when creating a directory
+      - G302 # Poor file permissions used with chmod
+      - G303 # Creating tempfile using a predictable path
+      - G304 # File path provided as taint input
+      - G305 # File traversal when extracting zip/tar archive
+      - G306 # Poor file permissions used when writing to a new file
+      - G307 # Poor file permissions used when creating a file with os.Create
+      - G401 # Detect the usage of MD5 or SHA1
+      - G402 # Look for bad TLS connection settings
+      - G403 # Ensure minimum RSA key length of 2048 bits
+      - G404 # Insecure random number source (rand)
+      - G405 # Detect the usage of DES or RC4
+      - G406 # Detect the usage of MD4 or RIPEMD160
+      - G501 # Import blocklist: crypto/md5
+      - G502 # Import blocklist: crypto/des
+      - G503 # Import blocklist: crypto/rc4
+      - G504 # Import blocklist: net/http/cgi
+      - G505 # Import blocklist: crypto/sha1
+      - G506 # Import blocklist: golang.org/x/crypto/md4
+      - G507 #Import blocklist: golang.org/x/crypto/ripemd160
+      - G601 # Implicit memory aliasing of items from a range statement
+      - G602 # Slice access out of bounds
+    # Exclude generated files
+    # Default: false
+    exclude-generated: true
+    # Filter out the issues with a lower severity than the given value.
+    # Valid options are: low, medium, high.
+    # Default: low
+    severity: medium
+    # Filter out the issues with a lower confidence than the given value.
+    # Valid options are: low, medium, high.
+    # Default: low
+    confidence: medium
+    # Concurrency value.
+    # Default: the number of logical CPUs usable by the current process.
+    concurrency: 12
+    # To specify the configuration of rules.
+    config:
+      # Globals are applicable to all rules.
+      global:
+        # If true, ignore #nosec in comments (and an alternative as well).
+        # Default: false
+        nosec: true
+        # Add an alternative comment prefix to #nosec (both will work at the same time).
+        # Default: ""
+        "#nosec": "#my-custom-nosec"
+        # Define whether nosec issues are counted as finding or not.
+        # Default: false
+        show-ignored: true
+        # Audit mode enables addition checks that for normal code analysis might be too nosy.
+        # Default: false
+        audit: true
+      G101:
+        # Regexp pattern for variables and constants to find.
+        # Default: "(?i)passwd|pass|password|pwd|secret|token|pw|apiKey|bearer|cred"
+        pattern: "(?i)example"
+        # If true, complain about all cases (even with low entropy).
+        # Default: false
+        ignore_entropy: false
+        # Maximum allowed entropy of the string.
+        # Default: "80.0"
+        entropy_threshold: "80.0"
+        # Maximum allowed value of entropy/string length.
+        # Is taken into account if entropy >= entropy_threshold/2.
+        # Default: "3.0"
+        per_char_threshold: "3.0"
+        # Calculate entropy for first N chars of the string.
+        # Default: "16"
+        truncate: "32"
+      # Additional functions to ignore while checking unhandled errors.
+      # Following functions always ignored:
+      #   bytes.Buffer:
+      #     - Write
+      #     - WriteByte
+      #     - WriteRune
+      #     - WriteString
+      #   fmt:
+      #     - Print
+      #     - Printf
+      #     - Println
+      #     - Fprint
+      #     - Fprintf
+      #     - Fprintln
+      #   strings.Builder:
+      #     - Write
+      #     - WriteByte
+      #     - WriteRune
+      #     - WriteString
+      #   io.PipeWriter:
+      #     - CloseWithError
+      #   hash.Hash:
+      #     - Write
+      #   os:
+      #     - Unsetenv
+      # Default: {}
+      G104:
+        fmt:
+          - Fscanf
+      G111:
+        # Regexp pattern to find potential directory traversal.
+        # Default: "http\\.Dir\\(\"\\/\"\\)|http\\.Dir\\('\\/'\\)"
+        pattern: "custom\\.Dir\\(\\)"
+      # Maximum allowed permissions mode for os.Mkdir and os.MkdirAll
+      # Default: "0750"
+      G301: "0750"
+      # Maximum allowed permissions mode for os.OpenFile and os.Chmod
+      # Default: "0600"
+      G302: "0600"
+      # Maximum allowed permissions mode for os.WriteFile and ioutil.WriteFile
+      # Default: "0600"
+      G306: "0600"
+
+
 
 # run:
 #   timeout: 2m
